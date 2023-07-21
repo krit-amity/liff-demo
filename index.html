@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sample HTML with CDN</title>
+        <script src="https://static.line-scdn.net/liff/edge/versions/2.21.0/sdk.js"></script>
+    </head>
+    <body>
+        <h1>Hello, World!</h1>
+        <p id="username"></p>
+        <p id="userId"></p>
+        <p id="urlParams"></p>
+
+        <script>
+            // Use the SDK here
+            liff.init({ liffId: '2000152190-EGQDLXpy' })
+                .then(() => {
+                    // Start to use liff's api
+                    if (!liff.isLoggedIn()) {
+                        liff.login();
+                    } else {
+                        displayUserData();
+                        displayURLParams();
+                    }
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+
+            function displayUserData() {
+                liff.getProfile()
+                    .then(profile => {
+                        const username = document.getElementById('username');
+                        username.innerHTML = `Hello, ${profile.displayName}!`;
+
+                        const userId = document.getElementById('userId');
+                        userId.innerHTML = `Your User ID is ${profile.userId}`;
+                    })
+                    .catch((err) => {
+                        console.error('Error getting profile', err);
+                    });
+            }
+
+            function displayURLParams() {
+                const params = new URLSearchParams(window.location.search);
+                let paramsText = 'URL Parameters: ';
+                for (const [key, value] of params) {
+                    paramsText += `<br/>${key}: ${value}`;
+                }
+                document.getElementById('urlParams').innerHTML = paramsText;
+            }
+        </script>
+    </body>
+</html>
