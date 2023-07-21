@@ -1,51 +1,73 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
     <title>Line Login Callback</title>
     <script>
-        window.onload = function() {
-            // Parse the URL
-            var url = new URL(window.location.href);
+      window.onload = function () {
+        // Parse the URL
+        var url = new URL(window.location.href);
 
-            // Get the code parameter from the callback URL
-            var code = url.searchParams.get('code');
+        // Get the code parameter from the callback URL
+        var code = url.searchParams.get("code");
 
-            // Get the state parameter from the callback URL
-            var state = url.searchParams.get('state');
+        // Get the state parameter from the callback URL
+        var state = url.searchParams.get("state");
 
-            // Check the state parameter
-            if(state === '12345abcde') {
-                // State matches what we expect, so we can trust the response
-                document.getElementById('code').innerText = 'Code: ' + code;
+        // Check the state parameter
+        if (state === "12345abcde") {
+          // State matches what we expect, so we can trust the response
+          document.getElementById("code").innerText = "Code: " + code;
 
-                // Exchange the code for a token
-                var body = new URLSearchParams();
-                body.append('grant_type', 'authorization_code');
-                body.append('code', code);
-                body.append('redirect_uri', 'https://krit-amity.github.io/liff-demo/callback.html');
-                body.append('client_id', '2000152190');
-                body.append('client_secret', 'c0bae4dea87e5639bce3601e9cbaf817');
+          // Exchange the code for a token
+          var body = new URLSearchParams();
+          body.append("grant_type", "authorization_code");
+          body.append("code", code);
+          body.append(
+            "redirect_uri",
+            "https://krit-amity.github.io/liff-demo/callback.html"
+          );
+          body.append("client_id", "2000152190");
+          body.append("client_secret", "c0bae4dea87e5639bce3601e9cbaf817");
 
-                fetch('https://api.line.me/oauth2/v2.1/token', {
-                    method: 'post',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
-                    },
-                    body: body
-                }).then(response => response.json()).then(data => {
-                    document.getElementById('token').innerText = 'Token: ' + JSON.stringify(data);
+          fetch("https://api.line.me/oauth2/v2.1/token", {
+            method: "post",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+            },
+            body: body,
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              document.getElementById("token").innerText =
+                "Token: " + JSON.stringify(data);
+
+              var accessToken = data.access_token;
+
+              // Fetch the profile data
+              fetch("https://api.line.me/v2/profile", {
+                method: "get",
+                headers: {
+                  Authorization: "Bearer " + accessToken,
+                },
+              })
+                .then((response) => response.json())
+                .then((profileData) => {
+                  document.getElementById("profile").innerText =
+                    "Profile: " + JSON.stringify(profileData);
                 });
-            } else {
-                // State does not match, so this might be a CSRF attack or a response to a request we did not make
-                document.getElementById('error').innerText = 'Error: Invalid state';
-            }
-        };
+            });
+        } else {
+          // State does not match, so this might be a CSRF attack or a response to a request we did not make
+          document.getElementById("error").innerText = "Error: Invalid state";
+        }
+      };
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>Line Login Callback</h1>
     <p id="code"></p>
     <p id="token"></p>
+    <p id="profile"></p>
     <p id="error"></p>
-</body>
+  </body>
 </html>
